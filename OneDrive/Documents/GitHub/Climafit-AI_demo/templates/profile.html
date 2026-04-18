@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | ClimaFit AI</title>
+    <meta name="description" content="Your ClimaFit AI profile - Manage your fashion preferences and account settings">
+    <!-- Reusing home styles + specific profile styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='animations.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        /* Specific Profile Styles - Premium Dark Theme */
+        body {
+            font-family: 'Outfit', sans-serif;
+            /* Inherits background from style.css */
+        }
+
+        .profile-container {
+            max-width: 850px;
+            margin: 80px auto;
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 180px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.3) 0%, transparent 100%);
+            animation: gradientShift 10s ease infinite;
+        }
+
+        .profile-avatar-wrapper {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 5px solid rgba(26, 26, 46, 0.9);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #ffffff;
+            font-weight: 800;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .profile-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-body {
+            padding: 80px 3rem 3rem;
+            text-align: center;
+        }
+
+        .profile-name {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-id {
+            font-size: 0.875rem;
+            color: #b8b8d1;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 2rem;
+        }
+
+        .stat-item {
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-item h4 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-item p {
+            font-size: 0.875rem;
+            color: #b8b8d1;
+            margin-top: 0.25rem;
+        }
+
+        .profile-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            text-align: left;
+        }
+
+        .detail-card {
+            background: rgba(15, 15, 30, 0.6);
+            backdrop-filter: blur(20px);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .detail-card:hover {
+            background: rgba(15, 15, 30, 0.8);
+            border-color: rgba(102, 126, 234, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .detail-card label {
+            display: block;
+            font-size: 0.75rem;
+            color: #667eea;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+        }
+
+        .detail-card span {
+            font-size: 1.125rem;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            margin-top: 3rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.9375rem;
+        }
+
+        .btn-outline {
+            border: 2px solid #667eea;
+            color: #667eea;
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            border-color: #764ba2;
+            background: rgba(102, 126, 234, 0.2);
+            color: #f093fb;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-danger {
+            background: rgba(245, 87, 108, 0.2);
+            color: #ff6b9d;
+            border: 2px solid rgba(245, 87, 108, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(245, 87, 108, 0.3);
+            border-color: #f5576c;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Reuse Header from Home -->
+    <header>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <!-- Logo -->
+            <img src="{{ url_for('static', filename='climafit_logo.png') }}" alt="Logo" style="height: 32px;">
+            <h1>ClimaFit AI</h1>
+        </div>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('scan') }}">AI Scan</a>
+            <div class="dropdown">
+                <a href="#">Account ▾</a>
+                <div class="dropdown-content">
+                    <a href="{{ url_for('profile') }}">Profile</a>
+                    <a href="#">Settings</a>
+                    <a href="{{ url_for('logout') }}" style="color: #ff6b6b;">Sign Out</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-avatar-wrapper">
+                <!-- Fallback to Initials if no image -->
+                {{ user.username[:2].upper() }}
+            </div>
+        </div>
+
+        <div class="profile-body">
+            <h2 class="profile-name">{{ user.username.title() }}</h2>
+            <span class="profile-id">ID: {{ user.id }}</span>
+
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <h4>12</h4>
+                    <p>Searches</p>
+                </div>
+                <div class="stat-item">
+                    <h4>Chhatrapati Sambhajinagar</h4>
+                    <p>Location</p>
+                </div>
+                <div class="stat-item">
+                    <h4>Winter</h4>
+                    <p>Fav Season</p>
+                </div>
+            </div>
+
+            <div class="profile-details-grid">
+                <div class="detail-card">
+                    <label>Email Address</label>
+                    <span>{{ user.email }}</span>
+                </div>
+                <div class="detail-card">
+                    <label>Member Since</label>
+                    <span>{{ user.joined }}</span>
+                </div>
+                <div class="detail-card">
+                    <label>Account Type</label>
+                    <span>Premium</span>
+                </div>
+                <div class="detail-card">
+                    <label>Status</label>
+                    <span style="color: #6B8E23;">● Active</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="{{ url_for('home') }}" class="btn btn-outline">Back to Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Sign Out</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

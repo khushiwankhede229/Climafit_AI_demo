@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ season }} Collection | ClimaFit AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='animations.css') }}">
+    <style>
+        .season-hero {
+            text-align: center;
+            padding: 50px 20px;
+            color: white;
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Theme overrides based on season will be injected via inline style or separate logic */
+    </style>
+</head>
+
+<body style="{{ theme_style }}">
+
+    <header>
+        <h1><a href="{{ url_for('home') }}" style="color:inherit; text-decoration:none;">ClimaFit AI</a></h1>
+        <nav>
+            <a href="{{ url_for('home') }}">Back to Home</a>
+        </nav>
+    </header>
+
+    <div class="season-hero"
+        style="background-image: url('{{ get_fashion_image(season, season, 99) }}'); background-color: rgba(0,0,0,0.5); background-blend-mode: overlay;">
+        <h1 style="font-size: 3em; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">{{ season }} Collection</h1>
+        <p>Curated recommendations for you</p>
+    </div>
+
+    <div class="grid-container">
+        {% for item in items %}
+        <div class="card">
+            <!-- Use a combination of product name and brand for unique seed -->
+            <img src="{{ get_fashion_image(item['Product Name'], item.get('Season', season), loop.index) }}"
+                alt="{{ item['Product Name'] }}"
+                style="width:100%; height:250px; object-fit:cover; border-radius: 10px 10px 0 0;">
+            <div class="card-content">
+                <h3>{{ item['Product Name'] }}</h3>
+                <p class="brand">{{ item['Brand'] }}</p>
+                <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                    <span class="price">₹{{ item['Price_INR'] }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</body>
+
+</html>

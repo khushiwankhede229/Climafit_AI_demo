@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Outfit Scan | ClimaFit AI</title>
+    <meta name="description"
+        content="Upload a clothing image for AI-powered outfit analysis, color detection, and season recommendations.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='animations.css') }}">
+
+    <style>
+        body {
+            background: var(--off-white);
+        }
+
+        /* ===== PAGE LAYOUT ===== */
+        .scan-page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 2rem 4rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width:860px) {
+            .scan-page {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== PAGE HEADER ===== */
+        .page-hero {
+            text-align: center;
+            padding: 2.5rem 2rem 1rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .page-hero .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 1rem;
+            background: var(--olive-wash);
+            border: 1px solid var(--olive-pale);
+            border-radius: var(--r-pill);
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--olive-deep);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .page-hero h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--ink);
+            letter-spacing: -1px;
+            margin-bottom: 0.6rem;
+            background: var(--grad-hero);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-hero p {
+            color: var(--text-sub);
+            font-size: 1rem;
+            line-height: 1.65;
+        }
+
+        /* ===== UPLOAD CARD ===== */
+        .upload-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--r-xl);
+            padding: 2.25rem;
+            box-shadow: var(--shadow-md);
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .upload-card h2 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--ink);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed rgba(107, 142, 62, 0.35);
+            border-radius: var(--r-lg);
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--t-normal);
+            background: var(--surface-2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drop-zone::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent, rgba(138, 173, 90, 0.06), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .drop-zone:hover::before {
+            transform: translateX(100%);
+        }
+
+        .drop-zone:hover,
+        .drop-zone.drag-over {
+            border-color: var(--olive-mid);
+            background: var(--olive-wash);
+            transform: scale(1.01);
+        }
+
+        .drop-zone.drag-over {
+            border-style: solid;
+        }
+
+        .drop-icon {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+            display: block;
+            transition: transform var(--t-normal);
+        }
+
+        .drop-zone:hover .drop-icon {
+            transform: translateY(-4px) scale(1.1);
+        }
+
+        .drop-zone h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.4rem;
+        }
+
+        .drop-zone p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Preview */
+        .preview-wrap {
+            margin: 1.25rem 0;
+            display: none;
+            position: relative;
+            border-radius: var(--r-lg);
+            overflow: hidden;
+            border: 2px solid var(--olive-pale);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .preview-wrap.show {
+            display: block;
+            animation: scaleIn 0.35s ease-out;
+        }
+
+        .preview-wrap img {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .preview-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border-radius: var(--r-pill);
+            padding: 0.3rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--olive-deep);
+        }
+
+        .remove-preview {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--text-sub);
+            transition: all var(--t-fast);
+        }
+
+        .remove-preview:hover {
+            background: #fee;
+            color: #c0392b;
+        }
+
+        /* Analyze Button */
+        .btn-scan {
+            width: 100%;
+            padding: 1rem;
+            background: var(--grad-hero);
+            color: white;
+            border: none;
+            border-radius: var(--r-md);
+            font-size: 1rem;
+            font-weight: 800;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all var(--t-normal);
+            box-shadow: 0 6px 20px rgba(74, 94, 42, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.2px;
+        }
+
+        .btn-scan::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+            transition: left 0.55s;
+        }
+
+        .btn-scan:hover::before {
+            left: 100%;
+        }
+
+        .btn-scan:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(74, 94, 42, 0.4);
+        }
+
+        .btn-scan:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* HOW IT WORKS tips */
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            padding: 0.75rem;
+            background: var(--surface-2);
+            border-radius: var(--r-sm);
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            border: 1px solid var(--border);
+        }
+
+        .tip-item .tip-no {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            background: var(--grad-primary);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        /* ===== RESULT CARD ===== */
+        .result-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--r-xl);
+            padding: 2.25rem;
+            box-shadow: var(--shadow-md);
+            animation: fadeInUp 0.5s ease-out 0.1s both;
+        }
+
+        .result-card h2 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--ink);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Empty state in result column */
+        .result-empty {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .result-empty .e-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .result-empty p {
+            font-size: 0.88rem;
+            line-height: 1.65;
+        }
+
+        /* Result rows */
+        .result-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--ink);
+            letter-spacing: -0.3px;
+        }
+
+        .result-sub {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-top: 0.2rem;
+        }
+
+        /* Color swatch */
+        .color-row {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            margin-top: 0.35rem;
+        }
+
+        .color-swatch {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 3px solid var(--white);
+            box-shadow: 0 0 0 2px var(--border), var(--shadow-sm);
+            flex-shrink: 0;
+            transition: transform var(--t-fast);
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.15);
+        }
+
+        .color-info .cn {
+            font-weight: 700;
+            color: var(--ink);
+            font-size: 1rem;
+        }
+
+        .color-info .ch {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        /* Season pill big */
+        .season-pill-big {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.65rem 1.25rem;
+            border-radius: var(--r-pill);
+            font-size: 1rem;
+            font-weight: 700;
+            margin-top: 0.35rem;
+        }
+
+        .season-pill-big.summer {
+            background: #fff3e0;
+            color: #c0540a;
+            border: 1.5px solid #f4c88a;
+        }
+
+        .season-pill-big.winter {
+            background: #e3eef7;
+            color: #1a5c80;
+            border: 1.5px solid #a8cfe0;
+        }
+
+        .season-pill-big.monsoon {
+            background: #e8f0fe;
+            color: #2845a0;
+            border: 1.5px solid #9ab0f0;
+        }
+
+        .season-pill-big.autumn {
+            background: #fef3e2;
+            color: #9c4d0e;
+            border: 1.5px solid #e8b97a;
+        }
+
+        .season-pill-big.spring {
+            background: #eaf3da;
+            color: #3d5220;
+            border: 1.5px solid #b5d88a;
+        }
+
+        /* Months tags */
+        .months-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+        }
+
+        .month-tag {
+            padding: 0.35rem 0.85rem;
+            background: var(--sky-wash);
+            border: 1px solid var(--sky-pale);
+            border-radius: var(--r-pill);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--sky-deep);
+            transition: all var(--t-fast);
+        }
+
+        .month-tag:hover {
+            background: var(--sky-mid);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Confidence bar */
+        .confidence-bar-wrap {
+            margin-top: 0.75rem;
+        }
+
+        .confidence-bar {
+            height: 8px;
+            background: var(--surface-3);
+            border-radius: var(--r-pill);
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: var(--grad-primary);
+            border-radius: var(--r-pill);
+            animation: fillBar 1s ease-out;
+            transform-origin: left;
+        }
+
+        @keyframes fillBar {
+            from {
+                transform: scaleX(0);
+            }
+
+            to {
+                transform: scaleX(1);
+            }
+        }
+
+        .conf-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+        }
+
+        /* Insight box */
+        .insight-box {
+            background: var(--grad-warm);
+            border: 1px solid var(--olive-pale);
+            border-radius: var(--r-md);
+            padding: 1rem 1.2rem;
+            font-size: 0.875rem;
+            color: var(--text-sub);
+            line-height: 1.65;
+            margin-top: 0.5rem;
+        }
+
+        .insight-box strong {
+            color: var(--olive-deep);
+        }
+
+        /* Outfit suggestions */
+        .outfit-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+        }
+
+        .outfit-chip {
+            padding: 0.35rem 0.8rem;
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-pill);
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            transition: all var(--t-fast);
+        }
+
+        .outfit-chip:hover {
+            background: var(--olive-wash);
+            color: var(--olive-deep);
+            border-color: var(--olive-pale);
+        }
+
+        /* Scanning animation */
+        .scanning {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .scanning.active {
+            display: block;
+        }
+
+        .scan-ring {
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--olive-pale);
+            border-top-color: var(--olive-mid);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .scan-text {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== HEADER ===== -->
+    <header>
+        <div style="display:flex;align-items:center;gap:0.6rem;">
+            <img src="{{ url_for('static', filename='climafit_logo.png') }}" alt="Logo"
+                style="height:32px;border-radius:8px;">
+            <h1><a href="{{ url_for('home') }}"
+                    style="text-decoration:none;background:var(--grad-hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1.4rem;font-weight:800;">ClimaFit
+                    AI</a></h1>
+        </div>
+        <nav>
+            <a href="{{ url_for('home') }}">🏠 Home</a>
+            <a href="{{ url_for('scan') }}"
+                style="color:var(--olive-deep);font-weight:800;background:var(--olive-wash);border-radius:var(--r-sm);">🔬
+                AI Scan</a>
+            <a href="{{ url_for('analytics') }}">📊 Trends</a>
+            <div class="dropdown">
+                <a href="#">Account ▾</a>
+                <div class="dropdown-content">
+                    <a href="{{ url_for('profile') }}">👤 Profile</a>
+                    <a href="#">⚙️ Settings</a>
+                    <a href="{{ url_for('logout') }}" style="color:#c0392b;">🚪 Sign Out</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ===== PAGE HERO ===== -->
+    <div class="page-hero">
+        <div class="badge">🔬 AI-Powered · Computer Vision</div>
+        <h1>AI Outfit Analysis</h1>
+        <p>Upload any clothing photo. Our AI analyzes colors, detects clothing type, and recommends the perfect season &
+            months to wear it.</p>
+    </div>
+
+    <!-- ===== MAIN GRID ===== -->
+    <div class="scan-page">
+
+        <!-- LEFT: Upload -->
+        <div class="upload-card">
+            <h2>📤 Upload Clothing Image</h2>
+
+            <form method="POST" enctype="multipart/form-data" id="scanForm">
+
+                <label class="drop-zone" for="fileUpload" id="dropZone">
+                    <span class="drop-icon" id="dropIcon">📸</span>
+                    <h3 id="dropTitle">Click or drag image here</h3>
+                    <p id="dropSub">Supports JPG, PNG, WEBP · Max 10MB</p>
+                </label>
+
+                <input type="file" name="image" id="fileUpload" class="file-input" accept="image/*" required
+                    onchange="handleFile(this)">
+
+                <!-- Preview -->
+                <div class="preview-wrap" id="previewWrap">
+                    <img id="imgPreview" alt="Preview">
+                    <div class="preview-label">Preview</div>
+                    <button type="button" class="remove-preview" onclick="clearPreview()" title="Remove">✕</button>
+                </div>
+
+                <button type="submit" class="btn-scan" id="analyzBtn" disabled>
+                    🔬 Analyze Clothing
+                </button>
+            </form>
+
+            <!-- Tips -->
+            <div class="tips-grid">
+                <div class="tip-item">
+                    <div class="tip-no">1</div>
+                    <span>Upload a clear, well-lit photo of the clothing item</span>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-no">2</div>
+                    <span>AI detects dominant colors from the image pixels</span>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-no">3</div>
+                    <span>Clothing type is identified from filename & analysis</span>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-no">4</div>
+                    <span>Get season & months best suited for your outfit</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Results -->
+        <div class="result-card">
+            <h2>📋 Analysis Results</h2>
+
+            {% if result %}
+            <!-- RESULTS -->
+            <div class="result-section">
+                <div class="result-label">Detected Clothing Type</div>
+                <div class="result-value">{{ result.clothing_type }}</div>
+                <div class="result-sub">Identified from image analysis</div>
+            </div>
+
+            <div class="result-section">
+                <div class="result-label">Primary Color</div>
+                <div class="color-row">
+                    <div class="color-swatch" style="background:{{ result.color_hex }};" title="{{ result.color_hex }}">
+                    </div>
+                    <div class="color-info">
+                        <div class="cn">{{ result.color_name }}</div>
+                        <div class="ch">{{ result.color_hex }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-section">
+                <div class="result-label">Recommended Season</div>
+                <div class="season-pill-big {{ result.season|lower }}">
+                    {{ {'Summer':'☀️','Winter':'❄️','Monsoon':'🌧️','Autumn':'🍂','Spring':'🌸'}.get(result.season,
+                    '🌤') }}
+                    {{ result.season }}
+                </div>
+            </div>
+
+            <div class="result-section">
+                <div class="result-label">Best Months To Wear</div>
+                <div class="months-wrap">
+                    {% for month in result.months %}
+                    <span class="month-tag">{{ month }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="result-section">
+                <div class="result-label">AI Confidence</div>
+                <div class="confidence-bar-wrap">
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width:{{ result.confidence }}%;"></div>
+                    </div>
+                    <div class="conf-meta">
+                        <span>Detection Accuracy</span>
+                        <span style="font-weight:700;color:var(--olive-mid);">{{ result.confidence }}%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-section">
+                <div class="result-label">Pairing Suggestions</div>
+                <div class="outfit-chips">
+                    {% for s in result.style_suggestions %}
+                    <span class="outfit-chip">{{ s }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="result-section">
+                <div class="result-label">AI Style Insight</div>
+                <div class="insight-box">
+                    {{ result.insight }}
+                </div>
+            </div>
+
+            {% else %}
+            <!-- EMPTY -->
+            <div class="result-empty">
+                <div class="e-icon">🧥</div>
+                <p>Upload a clothing image on the left to get instant AI analysis — color detection, season
+                    recommendations, and styling tips.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileUpload');
+        const previewWrap = document.getElementById('previewWrap');
+        const imgPreview = document.getElementById('imgPreview');
+        const analyzBtn = document.getElementById('analyzBtn');
+        const dropIcon = document.getElementById('dropIcon');
+        const dropTitle = document.getElementById('dropTitle');
+        const dropSub = document.getElementById('dropSub');
+
+        // Drag & drop
+        ['dragenter', 'dragover'].forEach(ev => {
+            dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+        });
+        ['dragleave', 'drop'].forEach(ev => {
+            dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove('drag-over'); });
+        });
+        dropZone.addEventListener('drop', e => {
+            const f = e.dataTransfer.files[0];
+            if (f && f.type.startsWith('image/')) {
+                fileInput.files = e.dataTransfer.files;
+                handleFile(fileInput);
+            }
+        });
+
+        function handleFile(input) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = e => {
+                imgPreview.src = e.target.result;
+                previewWrap.classList.add('show');
+                analyzBtn.disabled = false;
+                dropIcon.textContent = '✅';
+                dropTitle.textContent = file.name;
+                dropSub.textContent = (file.size / 1024).toFixed(1) + ' KB · Click to change';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearPreview() {
+            fileInput.value = '';
+            imgPreview.src = '';
+            previewWrap.classList.remove('show');
+            analyzBtn.disabled = true;
+            dropIcon.textContent = '📸';
+            dropTitle.textContent = 'Click or drag image here';
+            dropSub.textContent = 'Supports JPG, PNG, WEBP · Max 10MB';
+        }
+
+        // Show scanning state on submit
+        document.getElementById('scanForm').addEventListener('submit', () => {
+            analyzBtn.disabled = true;
+            analyzBtn.innerHTML = '<div style="width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;"></div> Analyzing…';
+        });
+    </script>
+</body>
+
+</html>
