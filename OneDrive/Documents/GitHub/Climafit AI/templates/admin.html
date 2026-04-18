@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | ClimaFit AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .admin-container {
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.85);
+            /* Light glass */
+            border-radius: 20px;
+            border: 1px solid rgba(85, 107, 47, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #E6EFC0;
+            padding-bottom: 15px;
+        }
+
+        .admin-header h2 {
+            font-size: 28px;
+            color: #384A1A;
+        }
+
+        .btn-back {
+            text-decoration: none;
+            padding: 8px 16px;
+            background: #6B8E23;
+            color: #fff;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .btn-back:hover {
+            background: #556B2F;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 1px solid #E6EFC0;
+        }
+
+        th {
+            background: #F0F4E8;
+            color: #4A5D23;
+            font-weight: 600;
+            border-radius: 8px 8px 0 0;
+        }
+
+        td {
+            color: #2B2B10;
+        }
+
+        tr:hover {
+            background: rgba(85, 107, 47, 0.05);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #9D9D60;
+            margin: 40px 0;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <!-- Logo -->
+            <img src="{{ url_for('static', filename='climafit_logo.png') }}" alt="Logo" style="height: 40px;">
+            <h1>ClimaFit AI <span
+                    style="font-size:14px; background:#6B8E23; color:white; padding:2px 8px; border-radius:4px; vertical-align:middle;">ADMIN</span>
+            </h1>
+        </div>
+        <nav>
+            <a href="{{ url_for('logout') }}" style="color: #ff6b6b;">Sign Out</a>
+        </nav>
+    </header>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <h2>User Activity Log</h2>
+            <a href="{{ url_for('home') }}" class="btn-back">← Back to App</a>
+        </div>
+
+        {% if users %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Email Address</th>
+                    <th>Password (Hash/Raw)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.Timestamp }}</td>
+                    <td><b>{{ user.Email }}</b></td>
+                    <td style="font-family: monospace; color: #666;">{{ user.Password }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            No user data recorded yet.
+        </div>
+        {% endif %}
+    </div>
+
+</body>
+
+</html>

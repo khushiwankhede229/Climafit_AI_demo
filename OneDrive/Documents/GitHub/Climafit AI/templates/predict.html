@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ML Hub - ClimaFit AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <h1><i class="fas fa-brain"></i> Prediction Hub</h1>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('analytics') }}">Trends</a>
+            <a href="{{ url_for('scan') }}">AI Scan</a>
+        </nav>
+    </header>
+
+    <div class="container"
+        style="max-width: 900px; margin: 40px auto; display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+
+        <!-- Price Prediction Card -->
+        <div class="card"
+            style="padding: 30px; text-align: center; border-radius: 15px; background: linear-gradient(135deg, #1e2a38 0%, #2c3e50 100%); border: 1px solid rgba(255,255,255,0.1);">
+            <i class="fas fa-tag" style="font-size: 3em; color: #6B8E23; margin-bottom: 20px;"></i>
+            <h2 style="color: #fff; margin-bottom: 15px;">Price Predictor</h2>
+            <p style="color: #ccc; margin-bottom: 25px;">Estimate the market price of a fashion item based on its brand,
+                fabric, and season features using our Regression Model.</p>
+            <a href="{{ url_for('predict_price') }}" class="nav-btn"
+                style="background: #6B8E23; color: white; text-decoration: none; padding: 12px 25px; border-radius: 25px; display: inline-block;">Predict
+                Price &rarr;</a>
+        </div>
+
+        <!-- Season Prediction Card -->
+        <div class="card"
+            style="padding: 30px; text-align: center; border-radius: 15px; background: linear-gradient(135deg, #1e2a38 0%, #2c3e50 100%); border: 1px solid rgba(255,255,255,0.1);">
+            <i class="fas fa-sun" style="font-size: 3em; color: #ffb703; margin-bottom: 20px;"></i>
+            <h2 style="color: #fff; margin-bottom: 15px;">Season Liability</h2>
+            <p style="color: #ccc; margin-bottom: 25px;">Determine the most suitable season for a specific fabric and
+                clothing type using our Classification Model.</p>
+            <a href="{{ url_for('predict_season') }}" class="nav-btn"
+                style="background: #ffb703; color: #1e2a38; font-weight: bold; text-decoration: none; padding: 12px 25px; border-radius: 25px; display: inline-block;">Check
+                Season &rarr;</a>
+        </div>
+
+        <!-- Popularity Score Card -->
+        <div class="card"
+            style="padding: 30px; text-align: center; border-radius: 15px; background: linear-gradient(135deg, #1e2a38 0%, #2c3e50 100%); border: 1px solid rgba(255,255,255,0.1);">
+            <i class="fas fa-fire" style="font-size: 3em; color: #e74c3c; margin-bottom: 20px;"></i>
+            <h2 style="color: #fff; margin-bottom: 15px;">Popularity Score</h2>
+            <p style="color: #ccc; margin-bottom: 25px;">Predict how trendy and successful an item will be (1-100) based
+                on fabric, brand, and season interactions.</p>
+            <a href="{{ url_for('predict_popularity') }}" class="nav-btn"
+                style="background: #e74c3c; color: white; font-weight: bold; text-decoration: none; padding: 12px 25px; border-radius: 25px; display: inline-block;">Predict
+                Trend &rarr;</a>
+        </div>
+
+        <!-- Occasion Prediction Card -->
+        <div class="card"
+            style="padding: 30px; text-align: center; border-radius: 15px; background: linear-gradient(135deg, #1e2a38 0%, #2c3e50 100%); border: 1px solid rgba(255,255,255,0.1);">
+            <i class="fas fa-glass-cheers" style="font-size: 3em; color: #9b59b6; margin-bottom: 20px;"></i>
+            <h2 style="color: #fff; margin-bottom: 15px;">Occasion Classifier</h2>
+            <p style="color: #ccc; margin-bottom: 25px;">Recommend the best event and occasion format based on
+                demographic and seasonal characteristics.</p>
+            <a href="{{ url_for('predict_occasion') }}" class="nav-btn"
+                style="background: #9b59b6; color: white; font-weight: bold; text-decoration: none; padding: 12px 25px; border-radius: 25px; display: inline-block;">Check
+                Occasion &rarr;</a>
+        </div>
+
+    </div>
+
+    <footer>
+        © 2025 ClimaFit AI | Machine Learning Module
+    </footer>
+</body>
+
+</html>

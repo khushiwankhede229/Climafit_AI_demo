@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClimaFit AI – Smart Fashion for Every Season</title>
+    <meta name="description"
+        content="ClimaFit AI - Climate-based fashion intelligence. Get AI-powered clothing recommendations based on live weather data.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='animations.css') }}">
+    <style>
+        /* ===== HOME PAGE EXTRAS ===== */
+        .logo-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+        }
+
+        .logo-row img {
+            height: 60px;
+            border-radius: 8px;
+            filter: drop-shadow(0 2px 6px rgba(74, 94, 42, 0.2));
+        }
+
+        /* Stats counter animation */
+        @keyframes countUp {
+            from {
+                transform: translateY(6px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .stat-card {
+            animation: countUp 0.6s ease-out backwards;
+        }
+
+        .stat-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .stat-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .stat-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .stat-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        /* Season hero strip */
+        .season-strip {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 1rem 2rem;
+            max-width: 1000px;
+            margin: 0 auto 1rem;
+        }
+
+        .season-hero-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 1rem 1.4rem;
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-lg);
+            text-decoration: none;
+            color: var(--text-sub);
+            font-size: 0.82rem;
+            font-weight: 700;
+            transition: all var(--t-normal);
+            box-shadow: var(--shadow-sm);
+            min-width: 90px;
+        }
+
+        .season-hero-btn .s-icon {
+            font-size: 1.6rem;
+        }
+
+        .season-hero-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--olive-mid);
+            background: var(--olive-wash);
+            color: var(--olive-deep);
+        }
+
+        .season-hero-btn.summer:hover {
+            background: #fff8e7;
+            border-color: #d4660a;
+            color: #d4660a;
+        }
+
+        .season-hero-btn.monsoon:hover {
+            background: #e8f0fe;
+            border-color: #3a5ca8;
+            color: #3a5ca8;
+        }
+
+        .season-hero-btn.winter:hover {
+            background: #e3eef7;
+            border-color: #2a6b8e;
+            color: #2a6b8e;
+        }
+
+        .season-hero-btn.autumn:hover {
+            background: #fef3e2;
+            border-color: #b05e15;
+            color: #b05e15;
+        }
+
+        .season-hero-btn.spring:hover {
+            background: #eaf3da;
+            border-color: #4a5e2a;
+            color: #4a5e2a;
+        }
+
+        /* Card overlay badge */
+        .card-overlay-top {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 3;
+        }
+
+        /* Image shimmer loader */
+        .img-wrap {
+            position: relative;
+            overflow: hidden;
+            height: 220px;
+            background: linear-gradient(135deg, var(--olive-wash), var(--sky-wash));
+        }
+
+        .img-wrap::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg,
+                    transparent 0%, rgba(255, 255, 255, 0.5) 50%, transparent 100%);
+            transform: translateX(-100%);
+            animation: shimmer 1.8s infinite;
+            z-index: 1;
+        }
+
+        @keyframes shimmer {
+            to {
+                transform: translateX(100%);
+            }
+        }
+
+        .img-wrap img {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--t-slow), opacity 0.4s;
+            opacity: 0;
+        }
+
+        .img-wrap img.loaded {
+            opacity: 1;
+        }
+
+        .img-wrap img.loaded+.img-wrap::before,
+        .card:has(.loaded) .img-wrap::before {
+            animation: none;
+            opacity: 0;
+        }
+
+        /* Location select styled */
+        .location-form {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .select-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .select-wrap label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select.location-select {
+            padding: 0.65rem 2.4rem 0.65rem 1rem;
+            border-radius: var(--r-sm);
+            border: 1.5px solid var(--border);
+            background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a7050' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 0.75rem center;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            transition: all 0.2s;
+            min-width: 170px;
+        }
+
+        select.location-select:focus {
+            border-color: var(--olive-mid);
+            box-shadow: 0 0 0 3px rgba(107, 142, 62, 0.15);
+        }
+
+        /* Weather Box enhanced */
+        .weather-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .w-stat {
+            background: var(--surface-2);
+            border-radius: var(--r-md);
+            padding: 0.85rem 0.75rem;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .w-stat .w-val {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--ink);
+            letter-spacing: -0.5px;
+        }
+
+        .w-stat .w-lbl {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0.15rem;
+        }
+
+        /* Style tip */
+        .style-tip-box {
+            max-width: 700px;
+            margin: 1.5rem auto;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--r-xl);
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            gap: 1.25rem;
+            align-items: flex-start;
+            animation: fadeInUp 0.5s ease-out 0.3s both;
+        }
+
+        .style-tip-icon {
+            font-size: 2.2rem;
+            flex-shrink: 0;
+        }
+
+        .style-tip-body h4 {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--olive-deep);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 0.3rem;
+        }
+
+        .style-tip-body p {
+            font-size: 0.88rem;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+
+        /* Section divider */
+        .divider {
+            width: 40px;
+            height: 3px;
+            background: var(--grad-primary);
+            border-radius: 3px;
+            margin: 0.5rem 0 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.2rem;
+            color: var(--text-sub);
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Subtle particles -->
+    <div class="particles" aria-hidden="true">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- ===== HEADER ===== -->
+    <header>
+        <a class="logo-row" href="{{ url_for('home') }}">
+            <img src="{{ url_for('static', filename='climafit_logo.png') }}" alt="ClimaFit AI Logo">
+            <h1>ClimaFit AI</h1>
+        </a>
+
+        <form class="search-bar" method="GET" action="{{ url_for('home') }}">
+            <input type="text" name="query" id="mainSearch" placeholder="🔍  Search fashion, season, brand…"
+                value="{{ request.args.get('query', '') }}" autocomplete="off">
+            <button type="submit">Search</button>
+        </form>
+
+        <nav>
+            {% if is_admin %}
+            <a href="{{ url_for('admin_dashboard') }}" style="color:var(--olive-mid);font-weight:800;">⭐ Admin</a>
+            {% endif %}
+            <a href="{{ url_for('analytics') }}">📊 Trends</a>
+            <a href="{{ url_for('predict_hub') }}">🤖 ML Predict</a>
+            <a href="{{ url_for('home') }}" style="color:var(--olive-deep);font-weight:800;">🏠 Home</a>
+            <a href="{{ url_for('scan') }}">✨ AI Scan</a>
+            <div class="dropdown">
+                <a href="#">Account ▾</a>
+                <div class="dropdown-content">
+                    <a href="{{ url_for('profile') }}">👤 Profile</a>
+                    <a href="{{ url_for('settings') }}">⚙️ Settings</a>
+                    <a href="{{ url_for('logout') }}" style="color:#c0392b;">🚪 Sign Out</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+        <!-- Logo above heading -->
+        <div class="hero-logo-wrap">
+            <img src="{{ url_for('static', filename='climafit_logo.png') }}" alt="ClimaFit AI Logo" class="hero-logo"
+                onerror="this.style.display='none'">
+        </div>
+        <div class="python-message">{{ message }}</div>
+        <h2>Climate-Based Fashion Intelligence</h2>
+        <p>Discover outfits perfectly matched to your local weather — powered by real-time climate data and AI.</p>
+    </section>
+
+    <!-- ===== QUICK SEASON NAVIGATION ===== -->
+    <div class="season-strip">
+        <a href="{{ url_for('season_view', season_name='Summer') }}" class="season-hero-btn summer">
+            <span class="s-icon">☀️</span>Summer
+        </a>
+        <a href="{{ url_for('season_view', season_name='Monsoon') }}" class="season-hero-btn monsoon">
+            <span class="s-icon">🌧️</span>Monsoon
+        </a>
+        <a href="{{ url_for('season_view', season_name='Winter') }}" class="season-hero-btn winter">
+            <span class="s-icon">❄️</span>Winter
+        </a>
+        <a href="{{ url_for('season_view', season_name='Autumn') }}" class="season-hero-btn autumn">
+            <span class="s-icon">🍂</span>Autumn
+        </a>
+        <a href="{{ url_for('season_view', season_name='Spring') }}" class="season-hero-btn spring">
+            <span class="s-icon">🌸</span>Spring
+        </a>
+    </div>
+
+    <!-- ===== STATS ROW ===== -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon">👗</div>
+            <div class="stat-value">5K+</div>
+            <div class="stat-label">Products</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🌍</div>
+            <div class="stat-value">28</div>
+            <div class="stat-label">States Covered</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🤖</div>
+            <div class="stat-value">AI</div>
+            <div class="stat-label">Powered</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🌤</div>
+            <div class="stat-value">Live</div>
+            <div class="stat-label">Weather Data</div>
+        </div>
+    </div>
+
+    <!-- ===== LOCATION + WEATHER ===== -->
+    <div class="search-section" style="margin:1rem auto 1.5rem;">
+        <h3>📍 Change Location</h3>
+        <form action="{{ url_for('home') }}" method="GET" class="location-form" id="locationForm">
+            {% if request.args.get('query') %}
+            <input type="hidden" name="query" value="{{ request.args.get('query') }}">
+            {% endif %}
+
+            <div class="select-wrap">
+                <label for="state">State</label>
+                <select id="state" name="state" class="location-select" onchange="populateDistricts()">
+                    <option value="">Select State</option>
+                </select>
+            </div>
+
+            <div class="select-wrap">
+                <label for="district">District</label>
+                <select id="district" name="district" class="location-select">
+                    <option value="">Select District</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-primary" style="margin-top:1.2rem;">
+                🗺️ Update Location
+            </button>
+        </form>
+    </div>
+
+    <!-- Weather box -->
+    <div class="weather-box">
+        <h2>🌤 Live Weather — {{ city }}</h2>
+        <div class="weather-grid">
+            <div class="w-stat">
+                <div class="w-val">{{ temperature }}°C</div>
+                <div class="w-lbl">Temperature</div>
+            </div>
+            <div class="w-stat">
+                <div class="w-val" style="font-size:1.1rem;">{{ weather }}</div>
+                <div class="w-lbl">Condition</div>
+            </div>
+            <div class="w-stat">
+                <div class="w-val" style="font-size:1rem;color:var(--olive-mid);">{{ selected_season }}</div>
+                <div class="w-lbl">AI Season Pick</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== AI STYLE TIP ===== -->
+    {% set tips = {
+    'Summer': {'icon':'☀️','tip':'Light cotton and linen fabrics are your best friends. Opt for light pastels and whites
+    to reflect heat. Wide-brim hats and UV sunglasses complete your look!'},
+    'Winter': {'icon':'❄️','tip':'Layer up with thermals underneath. A tailored woolen coat over a turtleneck is both
+    stylish and warm. Don\'t skip a cozy scarf!'},
+    'Monsoon': {'icon':'🌧️','tip':'Go for quick-dry fabrics and avoid linen. A sleek waterproof jacket in a bold color
+    keeps you chic while staying dry.'},
+    'Autumn': {'icon':'🍂','tip':'Earth tones are your canvas — terracotta, mustard, forest green. A light trench coat
+    layers beautifully over casual outfits.'},
+    'Spring': {'icon':'🌸','tip':'Florals are spring essentials. Combine fresh prints with neutral bottoms and
+    light-weight cardigans for the perfect seasonal look.'}
+    } %}
+
+    {% set tip_data = tips.get(selected_season, {'icon':'👕','tip':'Choose comfortable, breathable clothing suited to
+    your local weather conditions.'}) %}
+
+    <div class="style-tip-box">
+        <div class="style-tip-icon">{{ tip_data.icon }}</div>
+        <div class="style-tip-body">
+            <h4>✨ AI Style Tip for {{ selected_season }}</h4>
+            <p>{{ tip_data.tip }}</p>
+        </div>
+    </div>
+
+    <!-- ===== FILTER CHIPS ===== -->
+    <div class="section-label">
+        <div>
+            <h2>Featured Collections</h2>
+            <div class="divider"></div>
+        </div>
+        <a href="{{ url_for('home') }}" class="see-all">View all →</a>
+    </div>
+
+    <div class="filter-chips">
+        <a href="{{ url_for('home') }}"
+            class="filter-chip {{ 'active' if not request.args.get('query') and not request.args.get('season') }}">🏷️
+            All</a>
+        <a href="{{ url_for('home') }}?query=cotton" class="filter-chip">🌿 Cotton</a>
+        <a href="{{ url_for('home') }}?query=ethnic" class="filter-chip">🪷 Ethnic</a>
+        <a href="{{ url_for('home') }}?query=formal" class="filter-chip">💼 Formal</a>
+        <a href="{{ url_for('home') }}?query=casual" class="filter-chip">👕 Casual</a>
+        <a href="{{ url_for('home') }}?query=jacket" class="filter-chip">🧥 Jackets</a>
+        <a href="{{ url_for('home') }}?query=dress" class="filter-chip">👗 Dresses</a>
+    </div>
+
+    <!-- ===== CARDS ===== -->
+    <section class="cards">
+        {% if items %}
+        {% for item in items %}
+        <div class="card" onclick="window.location.href='{{ url_for('season_view', season_name=item['Season']) }}'"
+            tabindex="0" role="button" aria-label="{{ item['Product Name'] }}">
+
+            <!-- Season badge overlay -->
+            <div class="card-overlay-top">
+                <span class="season-chip {{ item['Season']|lower }}">{{ item['Season'] }}</span>
+            </div>
+
+            <!-- Image with shimmer -->
+            <div class="img-wrap">
+                <img src="{{ get_fashion_image(item.get('Product Name', '') + ' ' + item.get('Image_Keyword', ''), item.get('Season', 'Summer'), item.get('Image_Seed', loop.index)) }}"
+                    alt="{{ item['Product Name'] }}" loading="lazy" onload="this.classList.add('loaded')"
+                    onerror="this.src='{{ url_for('static', filename='climafit_logo.png') }}'; this.classList.add('loaded')">
+            </div>
+
+            <div class="card-content">
+                <div class="card-header">
+                    <h3>{{ item['Product Name'] }}</h3>
+                    <span class="price-badge">₹{{ item['Price_INR'] }}</span>
+                </div>
+                <div class="brand-label">{{ item['Brand'] }}</div>
+                <p>{{ item['Description'] }}</p>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state" style="grid-column:1/-1;">
+            <div class="empty-icon">🔍</div>
+            <h3>No results found</h3>
+            <p>Try a different search term or <a href="{{ url_for('home') }}"
+                    style="color:var(--olive-mid);font-weight:700;">browse all</a></p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- ===== QUICK ACTIONS ===== -->
+    <div class="features-strip">
+        <a href="{{ url_for('scan') }}" class="feature-pill">
+            <span class="icon">🔬</span> AI Outfit Scan
+        </a>
+        <a href="{{ url_for('predict_hub') }}" class="feature-pill">
+            <span class="icon">💡</span> Price Predictor
+        </a>
+        <a href="{{ url_for('analytics') }}" class="feature-pill">
+            <span class="icon">📊</span> Fashion Trends
+        </a>
+        <a href="{{ url_for('profile') }}" class="feature-pill">
+            <span class="icon">👤</span> My Profile
+        </a>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="footer-brand">ClimaFit AI</div>
+        <p>© 2025 ClimaFit AI — Climate-Based Fashion Intelligence &nbsp;·&nbsp; College Project Demo</p>
+    </footer>
+
+    <script>
+        // Load Indian States JSON
+        let indianStates = {};
+
+        fetch("{{ url_for('static', filename='indian_states.json') }}")
+            .then(r => r.json())
+            .then(data => {
+                indianStates = data;
+                populateStates();
+            })
+            .catch(err => console.warn('States load failed:', err));
+
+        function populateStates() {
+            const sel = document.getElementById('state');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">Select State</option>';
+            Object.keys(indianStates).sort().forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = s;
+                sel.appendChild(opt);
+            });
+            const params = new URLSearchParams(window.location.search);
+            const st = params.get('state');
+            if (st && indianStates[st]) { sel.value = st; populateDistricts(); }
+        }
+
+        function populateDistricts() {
+            const stSel = document.getElementById('state');
+            const dSel = document.getElementById('district');
+            if (!stSel || !dSel) return;
+            const state = stSel.value;
+            dSel.innerHTML = '<option value="">Select District</option>';
+            if (state && indianStates[state]) {
+                indianStates[state].forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d; opt.textContent = d;
+                    dSel.appendChild(opt);
+                });
+                const params = new URLSearchParams(window.location.search);
+                const dist = params.get('district');
+                if (dist) dSel.value = dist;
+            }
+        }
+
+        // Keyboard accessibility for cards
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') card.click();
+            });
+        });
+    </script>
+</body>
+
+</html>

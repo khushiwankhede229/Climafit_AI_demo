@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Popularity Prediction - ClimaFit AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: #f4f7f6;
+            color: #333;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .pred-box {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .pred-box h2 {
+            color: #e74c3c;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .btn-predict {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+
+        .btn-predict:hover {
+            background: #c0392b;
+        }
+
+        .result {
+            margin-top: 25px;
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8eceb;
+            border: 1px solid #fadbd8;
+        }
+
+        .result.error {
+            background: #fdf2f2;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .score {
+            font-size: 3em;
+            font-weight: 800;
+            color: #e74c3c;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1><i class="fas fa-fire"></i> Popularity Predictor</h1>
+        <nav>
+            <a href="{{ url_for('predict_hub') }}">&larr; Back to Hub</a>
+            <a href="{{ url_for('home') }}">Home</a>
+        </nav>
+    </header>
+
+    <div class="pred-box">
+        <h2>Trend Popularity Score</h2>
+        <p style="text-align: center; color: #777; margin-bottom: 20px;">Predict the potential market popularity out of
+            100.</p>
+
+        <form method="POST">
+            <div class="form-group">
+                <label>Brand</label>
+                <select name="brand" required>
+                    {% for b in brands %}
+                    <option value="{{ b }}">{{ b }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Fabric</label>
+                <select name="fabric" required>
+                    {% for f in fabrics %}
+                    <option value="{{ f }}">{{ f }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Season</label>
+                <select name="season" required>
+                    {% for s in seasons %}
+                    <option value="{{ s }}">{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn-predict">Predict Score</button>
+        </form>
+
+        {% if prediction %}
+        <div class="result">
+            <h3 style="color:#333; margin-top:0;">Predicted Trend Score</h3>
+            <div class="score">{{ prediction }} / 100</div>
+            <p style="margin-bottom:0; color:#555; margin-top:10px;">This item shows {% if prediction > 75 %}excellent{%
+                elif prediction > 50 %}good{% else %}moderate{% endif %} market potential.</p>
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="result error">
+            <p>{{ error }}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+
+</html>

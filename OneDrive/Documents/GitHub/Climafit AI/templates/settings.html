@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings – ClimaFit AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #f4f7f2;
+            color: #2d3a2e;
+            min-height: 100vh;
+        }
+
+        /* ── Navbar (matches your existing style) ── */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 40px;
+            background: #fff;
+            border-bottom: 1px solid #e8ede8;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3a2e;
+        }
+        .navbar-brand img {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+        }
+        .navbar-search {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .navbar-search input {
+            border: 1.5px solid #d5ddd5;
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            width: 280px;
+            outline: none;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .navbar-search button {
+            background: #4a7c59;
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            padding: 9px 22px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .navbar-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            list-style: none;
+        }
+        .navbar-links a {
+            text-decoration: none;
+            color: #2d3a2e;
+            font-size: 0.92rem;
+            font-weight: 500;
+        }
+        .navbar-links a.active { color: #4a7c59; }
+
+        /* ── Page layout ── */
+        .page-wrapper {
+            max-width: 860px;
+            margin: 48px auto;
+            padding: 0 24px 80px;
+        }
+
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: #2d3a2e;
+            margin-bottom: 6px;
+        }
+        .page-subtitle {
+            color: #6b806c;
+            font-size: 0.95rem;
+            margin-bottom: 36px;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: #fff;
+            border-radius: 18px;
+            border: 1px solid #e4ebe4;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 28px;
+            border-bottom: 1px solid #f0f4f0;
+        }
+        .card-header-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: #eaf2eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        .card-header h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2d3a2e;
+        }
+        .card-header p {
+            font-size: 0.82rem;
+            color: #7a917b;
+            margin-top: 1px;
+        }
+        .card-body { padding: 24px 28px; }
+
+        /* ── Form rows ── */
+        .form-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid #f5f7f5;
+        }
+        .form-row:last-child { border-bottom: none; }
+        .form-label {
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: #2d3a2e;
+        }
+        .form-hint {
+            font-size: 0.8rem;
+            color: #9aaa9b;
+            margin-top: 2px;
+        }
+
+        /* ── Inputs ── */
+        .form-input {
+            border: 1.5px solid #d5ddd5;
+            border-radius: 10px;
+            padding: 9px 14px;
+            font-size: 0.88rem;
+            font-family: 'DM Sans', sans-serif;
+            color: #2d3a2e;
+            outline: none;
+            width: 240px;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus { border-color: #4a7c59; }
+
+        /* ── Toggle ── */
+        .toggle {
+            position: relative;
+            width: 46px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: #d5ddd5;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 20px; height: 20px;
+            left: 3px; top: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        .toggle input:checked + .toggle-slider { background: #4a7c59; }
+        .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+        /* ── Select ── */
+        .form-select {
+            border: 1.5px solid #d5ddd5;
+            border-radius: 10px;
+            padding: 9px 14px;
+            font-size: 0.88rem;
+            font-family: 'DM Sans', sans-serif;
+            color: #2d3a2e;
+            outline: none;
+            width: 180px;
+            background: #fff;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .form-select:focus { border-color: #4a7c59; }
+
+        /* ── Danger zone ── */
+        .danger-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid #f5f7f5;
+        }
+        .danger-row:last-child { border-bottom: none; }
+
+        .btn-danger {
+            background: #fff;
+            color: #c0392b;
+            border: 1.5px solid #e8b4b0;
+            border-radius: 10px;
+            padding: 8px 18px;
+            font-size: 0.85rem;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-danger:hover { background: #fdf0ef; }
+
+        /* ── Save button ── */
+        .save-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+        .btn-save {
+            background: #4a7c59;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 32px;
+            font-size: 0.95rem;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn-save:hover { background: #3a6347; }
+        .btn-save:active { transform: scale(0.98); }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #2d3a2e;
+            color: #fff;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+            z-index: 999;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <a href="/home" class="navbar-brand">
+        <img src="{{ url_for('static', filename='climafit_logo.png') }}" alt="ClimaFit AI">
+        ClimaFit AI
+    </a>
+    <div class="navbar-search">
+        <input type="text" placeholder="🔍  Search fashion, season, brand...">
+        <button>Search</button>
+    </div>
+    <ul class="navbar-links">
+        <li><a href="/admin">⭐ Admin</a></li>
+        <li><a href="/trends">📊 Trends</a></li>
+        <li><a href="/ml_predict">🤖 ML Predict</a></li>
+        <li><a href="/home">🏠 Home</a></li>
+        <li><a href="/scan">✨ AI Scan</a></li>
+        <li><a href="/settings" class="active">⚙️ Settings</a></li>
+    </ul>
+</nav>
+
+<!-- Page Content -->
+<div class="page-wrapper">
+    <h1 class="page-title">Settings</h1>
+    <p class="page-subtitle">Manage your account preferences and app settings.</p>
+
+    <!-- Profile -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-icon">👤</div>
+            <div>
+                <h2>Profile</h2>
+                <p>Update your personal information</p>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="form-row">
+                <div>
+                    <div class="form-label">Full Name</div>
+                    <div class="form-hint">Displayed on your profile</div>
+                </div>
+                <input type="text" class="form-input" placeholder="Your name"
+                       value="{{ session.get('name', '') }}">
+            </div>
+            <div class="form-row">
+                <div>
+                    <div class="form-label">Email Address</div>
+                    <div class="form-hint">Used for login and notifications</div>
+                </div>
+                <input type="email" class="form-input" placeholder="you@email.com"
+                       value="{{ session.get('email', '') }}">
+            </div>
+            <div class="form-row">
+                <div>
+                    <div class="form-label">Location</div>
+                    <div class="form-hint">Used for weather-based recommendations</div>
+                </div>
+                <input type="text" class="form-input" placeholder="e.g. Mumbai, India">
+            </div>
+        </div>
+    </div>
+
+    <!-- Preferences -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-icon">🎨</div>
+            <div>
+                <h2>Preferences</h2>
+                <p>Customise your ClimaFit experience</p>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="form-row">
+                <div>
+                    <div class="form-label">Preferred Gender Style</div>
+                    <div class="form-hint">Filter outfit recommendations</div>
+                </div>
+                <select class="form-select">
+                    <option>All</option>
+                    <option>Men</option>
+                    <option>Women</option>
+                    <option>Unisex</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <div>
+                    <div class="form-label">Default Season</div>
+                    <div class="form-hint">Used when weather data is unavailable</div>
+                </div>
+                <select class="form-select">
+                    <option>Auto (Weather)</option>
+                    <option>Summer</option>
+                    <option>Monsoon</option>
+                    <option>Winter</option>
+                    <option>Autumn</option>
+                    <option>Spring</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <div>
+                    <div class="form-label">Currency</div>
+                    <div class="form-hint">For price predictions</div>
+                </div>
+                <select class="form-select">
+                    <option>₹ INR</option>
+                    <option>$ USD</option>
+                    <option>€ EUR</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-icon">🔔</div>
+            <div>
+                <h2>Notifications</h2>
+                <p>Control what alerts you receive</p>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="form-row">
+                <div>
+                    <div class="form-label">Weather Alerts</div>
+                    <div class="form-hint">Get notified on season changes</div>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="form-row">
+                <div>
+                    <div class="form-label">Fashion Trend Updates</div>
+                    <div class="form-hint">Weekly trending outfit alerts</div>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="form-row">
+                <div>
+                    <div class="form-label">ML Model Updates</div>
+                    <div class="form-hint">Notify when predictions improve</div>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-icon">🔒</div>
+            <div>
+                <h2>Security</h2>
+                <p>Manage your password and account access</p>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="form-row">
+                <div>
+                    <div class="form-label">Change Password</div>
+                    <div class="form-hint">Update your login password</div>
+                </div>
+                <input type="password" class="form-input" placeholder="New password">
+            </div>
+            <div class="form-row">
+                <div>
+                    <div class="form-label">Confirm Password</div>
+                    <div class="form-hint">Re-enter new password</div>
+                </div>
+                <input type="password" class="form-input" placeholder="Confirm password">
+            </div>
+        </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-icon">⚠️</div>
+            <div>
+                <h2>Danger Zone</h2>
+                <p>Irreversible account actions</p>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="danger-row">
+                <div>
+                    <div class="form-label">Log Out</div>
+                    <div class="form-hint">Sign out of your account</div>
+                </div>
+                <a href="/logout"><button class="btn-danger">Log Out</button></a>
+            </div>
+            <div class="danger-row">
+                <div>
+                    <div class="form-label">Delete Account</div>
+                    <div class="form-hint">Permanently remove your data</div>
+                </div>
+                <button class="btn-danger" onclick="confirmDelete()">Delete Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save -->
+    <div class="save-bar">
+        <button class="btn-save" onclick="saveSettings()">Save Changes</button>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">✅ Settings saved successfully!</div>
+
+<script>
+function saveSettings() {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function confirmDelete() {
+    if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+        window.location.href = '/delete_account';
+    }
+}
+</script>
+
+</body>
+</html>
