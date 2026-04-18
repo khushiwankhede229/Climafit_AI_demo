@@ -668,30 +668,31 @@ def scan():
 # ===== ML Prediction Routes =====
 # Load Models Global
 ml_models = {}
+models_dir = os.path.join(BASE_DIR, "models")
 try:
     # Regression Objects
-    with open('models/price_model.pkl', 'rb') as f: ml_models['price_model'] = pickle.load(f)
-    with open('models/le_brand.pkl', 'rb') as f: ml_models['le_brand'] = pickle.load(f)
-    with open('models/le_fabric.pkl', 'rb') as f: ml_models['le_fabric'] = pickle.load(f)
-    with open('models/le_gender.pkl', 'rb') as f: ml_models['le_gender'] = pickle.load(f)
-    with open('models/le_season.pkl', 'rb') as f: ml_models['le_season'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'price_model.pkl'), 'rb') as f: ml_models['price_model'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'le_brand.pkl'), 'rb') as f: ml_models['le_brand'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'le_fabric.pkl'), 'rb') as f: ml_models['le_fabric'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'le_gender.pkl'), 'rb') as f: ml_models['le_gender'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'le_season.pkl'), 'rb') as f: ml_models['le_season'] = pickle.load(f)
     
-    with open('models/popularity_model.pkl', 'rb') as f: ml_models['popularity_model'] = pickle.load(f)
-    with open('models/le_brand_pop.pkl', 'rb') as f: ml_models['le_brand_pop'] = pickle.load(f)
-    with open('models/le_fabric_pop.pkl', 'rb') as f: ml_models['le_fabric_pop'] = pickle.load(f)
-    with open('models/le_season_pop.pkl', 'rb') as f: ml_models['le_season_pop'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'popularity_model.pkl'), 'rb') as f: ml_models['popularity_model'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'le_brand_pop.pkl'), 'rb') as f: ml_models['le_brand_pop'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'le_fabric_pop.pkl'), 'rb') as f: ml_models['le_fabric_pop'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'le_season_pop.pkl'), 'rb') as f: ml_models['le_season_pop'] = pickle.load(f)
     
     # Classification Objects
-    with open('models/season_model.pkl', 'rb') as f: ml_models['season_model'] = pickle.load(f)
-    with open('models/le_fabric_c.pkl', 'rb') as f: ml_models['le_fabric_c'] = pickle.load(f)
-    with open('models/le_gender_c.pkl', 'rb') as f: ml_models['le_gender_c'] = pickle.load(f)
-    with open('models/le_season_c.pkl', 'rb') as f: ml_models['le_season_c'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'season_model.pkl'), 'rb') as f: ml_models['season_model'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'le_fabric_c.pkl'), 'rb') as f: ml_models['le_fabric_c'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'le_gender_c.pkl'), 'rb') as f: ml_models['le_gender_c'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'le_season_c.pkl'), 'rb') as f: ml_models['le_season_c'] = pickle.load(f)
 
-    with open('models/occasion_model.pkl', 'rb') as f: ml_models['occasion_model'] = pickle.load(f)
-    with open('models/le_fabric_o.pkl', 'rb') as f: ml_models['le_fabric_o'] = pickle.load(f)
-    with open('models/le_gender_o.pkl', 'rb') as f: ml_models['le_gender_o'] = pickle.load(f)
-    with open('models/le_season_o.pkl', 'rb') as f: ml_models['le_season_o'] = pickle.load(f)
-    with open('models/le_occ_o.pkl', 'rb') as f: ml_models['le_occ_o'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'occasion_model.pkl'), 'rb') as f: ml_models['occasion_model'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'le_fabric_o.pkl'), 'rb') as f: ml_models['le_fabric_o'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'le_gender_o.pkl'), 'rb') as f: ml_models['le_gender_o'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'le_season_o.pkl'), 'rb') as f: ml_models['le_season_o'] = pickle.load(f)
+    with open(os.path.join(models_dir, 'le_occ_o.pkl'), 'rb') as f: ml_models['le_occ_o'] = pickle.load(f)
     
     print("ML Models loaded successfully.")
 except Exception as e:
